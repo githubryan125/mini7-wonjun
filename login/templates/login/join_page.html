@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+<script>
+    function join_chk(){
+        let id = $("#id").val();
+        let pw = $("#password").val();
+        let pw2 = $("#password2").val();
+        let email = $("#email").val();
+        let phone = $("#phone").val();
+
+        let regex = /^[a-zA-Z0-9]+$/;
+
+        if(id === "" || password === "" || email === "" || phone === ""){
+            alert("모든 필드를 입력해주세요.");
+            return;
+        }
+        
+        if (!regex.test(id)) {
+            console.log("아이디나오냐?");
+            alert("ID는 영어 대문자, 소문자, 숫자만 포함해야 합니다.");
+            return;
+        }
+
+        if (pw !== pw2) {
+            alert("비밀번호와 비밀번호 확인은 같아야 합니다.");
+            return;
+        } 
+        let param = {
+            id: $("#id").val()
+            , pw: sha256($("#password").val()),
+            pw2: sha256($("#password2").val())
+        };
+        $.ajax({
+            url: "join_chk",
+            type: 'post',
+            data: param,
+            dataType: "json",
+            success: function (data) {
+                if(data.result === "id overlap"){
+                    alert("이미 사용 중인 ID입니다. 다른 ID를 선택해주세요.");
+                } else if(data.result === "success") {
+                    alert("가입 성공!");
+                    $("#frm").submit();  // 폼 제출
+                } else {
+                    alert("서버 오류가 발생했습니다.");
+                }
+            },
+            error: function () {
+                alert("ERROR");
+            },
+            complete: function () {
+                alert("회원가입이 완료되었습니다.");
+                $("#frm").attr("action","/login/").submit();
+            },
+        });
+    }
+</script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../static/base.css" rel="stylesheet">
+    <title>LOGIN</title>
+</head>
+<body>
+<form id="frm" name="frm" class="frm">
+    <div class="login-box">
+        <div>
+            <div class="login">Join</div>
+        </div>
+        <hr class="hr"/>
+        <div class="login-text">ID</div>
+        <div class="id"><input type="text" id="id"></div>
+        <div class="login-text">PASSWORD</div>
+        <div class="pw"><input type="password" id="password"></div>
+        <div class="login-text">PASSWORD 확인</div>
+        <div class="pw"><input type="password" id="password2"></div>
+
+        <div class="login-text">EMAIL</div>
+        <div class="email"><input type="email" id="email" placeholder="이메일을 입력하세요"></div>
+        <div class="login-text">PHONE NUMBER</div>
+        <div class="phone"><input type="phone" id="phone" placeholder="전화번호를 입력하세요"></div>
+        <div class="btn">
+            <button type="button" id="Join" class="btn" onclick="join_chk();">Join</button>
+        </div>
+    </div>
+</form>
+</body>
+</html>
